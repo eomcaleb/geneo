@@ -8,4 +8,4 @@ A minimal, mobile-friendly view of the genealogy in Genesis 1–5, organized by 
 - **Genesis 4** – Cain's line and Seth's line split
 - **Genesis 5** – Adam → Noah with ages and a lifespan timeline
 
-Single static `index.html` with no build step or dependencies. Served with GitHub Pages.
+Single static `index.html` with no build step or dependencies, served with GitHub Pages. It shows an org chart that builds up chapter by chapter, with foldable branches and tap-for-details boxes.
