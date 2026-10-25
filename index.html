@@ -1,0 +1,398 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<meta name="description" content="A condensed genealogy of Genesis 1–5, from creation to Noah, organized by what each chapter reveals.">
+<title>Genesis 1–5 Genealogy</title>
+<style>
+  :root {
+    --bg: #000;
+    --panel: #0a0a0a;
+    --line: #1c1c1c;
+    --line-2: #2a2a2a;
+    --text: #e8e8e8;
+    --dim: #8a8a8a;
+    --faint: #555;
+    --accent: #f2f2f2;
+    --hi: #d9b45a;
+    --cain: #b0584f;
+    --seth: #7aa2c4;
+    --mono: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 14px/1.5 var(--sans);
+    padding: max(16px, env(safe-area-inset-top)) 16px 48px;
+  }
+  main { max-width: 760px; margin: 0 auto; }
+  .num, .mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+
+  header { padding: 20px 0 16px; border-bottom: 1px solid var(--line); }
+  .eyebrow { font: 11px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--dim); }
+  h1 { font-size: 22px; font-weight: 600; letter-spacing: -.01em; margin: 8px 0 4px; }
+  .sub { color: var(--dim); margin: 0; font-size: 13px; }
+
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); border-bottom: 1px solid var(--line); }
+  .stat { padding: 14px 0 14px 12px; border-left: 1px solid var(--line); }
+  .stat:first-child { border-left: 0; padding-left: 0; }
+  .stat b { display: block; font: 600 20px/1.1 var(--mono); }
+  .stat span { font-size: 11px; color: var(--dim); }
+  @media (max-width: 480px) {
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    .stat:nth-child(3) { border-left: 0; padding-left: 0; }
+    .stat:nth-child(n+3) { border-top: 1px solid var(--line); }
+  }
+
+  .controls { display: flex; justify-content: flex-end; gap: 12px; padding: 10px 0; }
+  .controls button {
+    background: none; border: 0; color: var(--dim); font: 11px var(--mono);
+    letter-spacing: .08em; text-transform: uppercase; cursor: pointer; padding: 4px 0;
+  }
+  .controls button:hover { color: var(--text); }
+
+  details { border-top: 1px solid var(--line); }
+  details:last-of-type { border-bottom: 1px solid var(--line); }
+  summary {
+    list-style: none; cursor: pointer; padding: 14px 0;
+    display: grid; grid-template-columns: 34px 1fr auto 14px; gap: 10px; align-items: baseline;
+  }
+  summary::-webkit-details-marker { display: none; }
+  summary .ch { font: 12px var(--mono); color: var(--faint); }
+  summary .ttl { font-weight: 600; }
+  summary .ttl small { display: block; font-weight: 400; color: var(--dim); font-size: 12px; margin-top: 2px; }
+  summary .count { font: 11px var(--mono); color: var(--dim); white-space: nowrap; }
+  summary .chev { color: var(--faint); font: 12px var(--mono); transition: transform .15s; }
+  details[open] summary .chev { transform: rotate(90deg); }
+  summary:hover .ttl { color: var(--accent); }
+
+  .body { padding: 0 0 18px 44px; }
+  @media (max-width: 480px) { .body { padding-left: 0; } }
+
+  .reveal {
+    font-size: 13px; color: var(--text); border-left: 2px solid var(--hi);
+    padding: 2px 0 2px 10px; margin: 0 0 14px;
+  }
+  .label { font: 10px var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--faint); margin: 16px 0 6px; }
+
+  .facts { display: grid; grid-template-columns: 54px 1fr; border-top: 1px solid var(--line); }
+  .facts > * { padding: 7px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
+  .facts .ref { font: 11px/1.9 var(--mono); color: var(--dim); }
+  .facts em { font-style: normal; color: var(--accent); font-weight: 600; }
+
+  /* Mini tree */
+  .tree { font: 12.5px/1.75 var(--mono); color: var(--dim); white-space: pre; overflow-x: auto; margin: 0; }
+  .tree b { color: var(--text); font-weight: 500; }
+  .tree .c { color: var(--cain); }
+  .tree .s { color: var(--seth); }
+
+  /* Parallel lines (ch 4) */
+  .par { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .par th { font: 10px var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--faint); text-align: left; font-weight: 400; padding: 0 0 6px; }
+  .par td { padding: 6px 0; border-top: 1px solid var(--line); vertical-align: top; }
+  .par td:first-child { font: 11px/1.9 var(--mono); color: var(--faint); width: 34px; }
+  .par .c { color: var(--cain); }
+  .par .s { color: var(--seth); }
+  .par .echo { border-bottom: 1px dotted var(--hi); }
+  .par small { color: var(--dim); display: block; font-size: 11px; }
+  .key { display: flex; gap: 14px; flex-wrap: wrap; font: 11px var(--mono); color: var(--dim); margin-top: 10px; }
+  .key i { display: inline-block; width: 8px; height: 8px; margin-right: 6px; vertical-align: 0; }
+
+  /* Timeline (ch 5) */
+  .tl { position: relative; }
+  .axis, .row { display: grid; grid-template-columns: 92px 1fr 40px; gap: 10px; align-items: center; }
+  .axis { font: 10px var(--mono); color: var(--faint); padding-bottom: 4px; }
+  .ticks { position: relative; height: 14px; }
+  .ticks span { position: absolute; transform: translateX(-50%); }
+  .ticks span:first-child { transform: none; }
+  .row { padding: 5px 0; border-top: 1px solid var(--line); cursor: pointer; }
+  .row:hover .nm, .row.on .nm { color: var(--accent); }
+  .nm { font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .nm small { color: var(--faint); font: 10px var(--mono); margin-right: 6px; }
+  .tot { font: 12px var(--mono); text-align: right; color: var(--dim); }
+  .track { position: relative; height: 10px; }
+  .track::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: var(--line); }
+  .bar { position: absolute; top: 1px; bottom: 1px; background: var(--seth); opacity: .85; border-radius: 1px; }
+  .bar.open { background: linear-gradient(90deg, var(--seth), transparent); }
+  .bar.taken::after { content: "↑"; position: absolute; right: -10px; top: -5px; font: 10px var(--mono); color: var(--hi); }
+  .beget { position: absolute; top: -2px; bottom: -2px; width: 2px; background: var(--bg); }
+  .flood { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--hi); opacity: .7; pointer-events: none; }
+  .tl.focus .row:not(.on):not(.ov) .bar { opacity: .18; }
+  .row.ov .bar { opacity: .85; }
+  .detail { grid-column: 1 / -1; display: none; font-size: 12px; color: var(--dim); padding: 4px 0 6px; }
+  .row.on .detail { display: block; }
+  .detail .num { color: var(--text); }
+  .note { font-size: 12px; color: var(--dim); margin: 10px 0 0; }
+  @media (max-width: 480px) {
+    .axis, .row { grid-template-columns: 76px 1fr 32px; gap: 8px; }
+    .nm small { display: none; }
+  }
+
+  .ages { width: 100%; border-collapse: collapse; font: 12px var(--mono); }
+  .ages th { font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--faint); font-weight: 400; text-align: right; padding: 0 0 6px; }
+  .ages td { padding: 5px 0; border-top: 1px solid var(--line); text-align: right; color: var(--dim); }
+  .ages th:first-child, .ages td:first-child { text-align: left; color: var(--text); font-family: var(--sans); font-size: 13px; }
+  .ages td.t { color: var(--text); }
+  .ages-wrap { overflow-x: auto; }
+
+  footer { margin-top: 28px; font-size: 11px; color: var(--faint); font-family: var(--mono); line-height: 1.7; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="eyebrow">Genealogy · Genesis 1–5</div>
+    <h1>From Creation to Noah</h1>
+    <p class="sub">Each chapter adds a layer to the family line. Tap a chapter to expand.</p>
+  </header>
+
+  <section class="stats" aria-label="Summary">
+    <div class="stat"><b>10</b><span>generations, Adam → Noah</span></div>
+    <div class="stat"><b>1,656</b><span>years, creation → flood*</span></div>
+    <div class="stat"><b>969</b><span>longest life (Methuselah)</span></div>
+    <div class="stat"><b>2</b><span>lines: Cain &amp; Seth</span></div>
+  </section>
+
+  <div class="controls">
+    <button type="button" id="expand">Expand all</button>
+    <button type="button" id="collapse">Collapse all</button>
+  </div>
+
+  <!-- Genesis 1 -->
+  <details open>
+    <summary>
+      <span class="ch">01</span>
+      <span class="ttl">Humanity created<small>Genesis 1 · the root of every line</small></span>
+      <span class="count">day 6</span>
+      <span class="chev">›</span>
+    </summary>
+    <div class="body">
+      <p class="reveal">Humankind (<i>adam</i>) is made in God’s image, male and female, and told to multiply. The genealogy starts here — with a blessing to be fruitful.</p>
+      <div class="facts">
+        <span class="ref">1:1</span><span>God creates the heavens and the earth.</span>
+        <span class="ref">1:26</span><span>“Let us make <em>man</em> in our image” — <i>adam</i> as a kind, not yet a name.</span>
+        <span class="ref">1:27</span><span>Created <em>male and female</em>.</span>
+        <span class="ref">1:28</span><span>“Be fruitful and multiply” — the first mandate for descendants.</span>
+        <span class="ref">1:31</span><span>Day six. Everything is “very good.”</span>
+      </div>
+    </div>
+  </details>
+
+  <!-- Genesis 2 -->
+  <details>
+    <summary>
+      <span class="ch">02</span>
+      <span class="ttl">The first couple<small>Genesis 2 · Adam and the woman</small></span>
+      <span class="count">2 people</span>
+      <span class="chev">›</span>
+    </summary>
+    <div class="body">
+      <p class="reveal">The lens zooms from humanity to one man and one woman. The first <i>toledot</i> (“these are the generations”) heading appears, and marriage is set as the frame for every family that follows.</p>
+      <pre class="tree"><b>God</b>
+ ├─ forms <b>the man</b> from dust          2:7
+ └─ builds <b>the woman</b> from his side   2:22
+        └─ “one flesh”                 2:24</pre>
+      <div class="facts" style="margin-top:12px">
+        <span class="ref">2:4</span><span><em>Toledot #1</em> — “generations of the heavens and the earth.”</span>
+        <span class="ref">2:7</span><span>The man is formed from the dust and given the breath of life.</span>
+        <span class="ref">2:8</span><span>Placed in Eden.</span>
+        <span class="ref">2:22</span><span>The woman is made from his rib.</span>
+        <span class="ref">2:24</span><span>A man leaves his parents and holds fast to his wife — the template for every household after.</span>
+      </div>
+    </div>
+  </details>
+
+  <!-- Genesis 3 -->
+  <details>
+    <summary>
+      <span class="ch">03</span>
+      <span class="ttl">The fall and the promised seed<small>Genesis 3 · Eve named</small></span>
+      <span class="count">1 promise</span>
+      <span class="chev">›</span>
+    </summary>
+    <div class="body">
+      <p class="reveal">Nobody is born yet, but the line gets its purpose: a coming “seed” of the woman. Childbirth now comes with pain, and death enters the story. The woman gets her name.</p>
+      <div class="facts">
+        <span class="ref">3:6</span><span>The man and woman eat from the forbidden tree.</span>
+        <span class="ref">3:15</span><span><em>Seed of the woman</em> vs seed of the serpent — the thread every later genealogy follows.</span>
+        <span class="ref">3:16</span><span>Pain in childbearing.</span>
+        <span class="ref">3:19</span><span>“To dust you shall return” — death enters, so lifespans start to count.</span>
+        <span class="ref">3:20</span><span>Named <em>Eve</em>, “mother of all living.”</span>
+        <span class="ref">3:24</span><span>Sent out of Eden.</span>
+      </div>
+    </div>
+  </details>
+
+  <!-- Genesis 4 -->
+  <details>
+    <summary>
+      <span class="ch">04</span>
+      <span class="ttl">Two lines diverge<small>Genesis 4 · Cain, Abel, Seth</small></span>
+      <span class="count">17 names</span>
+      <span class="chev">›</span>
+    </summary>
+    <div class="body">
+      <p class="reveal">The first children are born, and the first one kills the second. The family splits: Cain’s line builds cities, invents crafts and escalates violence, while Seth’s line begins to “call on the name of the LORD.”</p>
+
+      <pre class="tree"><b>Adam</b> + <b>Eve</b>
+ ├─ <span class="c">Cain</span>  ─ farmer, murderer, city-builder   4:1
+ ├─ Abel  ─ shepherd, killed (no line)       4:2
+ └─ <span class="s">Seth</span>  ─ “appointed” in Abel’s place      4:25
+     └─ <span class="s">Enosh</span> ─ people call on the LORD       4:26</pre>
+
+      <div class="label">Cain’s line vs Seth’s line (by generation from Adam)</div>
+      <table class="par">
+        <thead><tr><th>Gen</th><th>Cain · Gen 4</th><th>Seth · Gen 4–5</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td colspan="2">Adam</td></tr>
+          <tr><td>2</td><td class="c">Cain</td><td class="s">Seth</td></tr>
+          <tr><td>3</td><td class="c"><span class="echo">Enoch</span><small>a city named after him</small></td><td class="s">Enosh</td></tr>
+          <tr><td>4</td><td class="c"><span class="echo">Irad</span></td><td class="s"><span class="echo">Kenan</span></td></tr>
+          <tr><td>5</td><td class="c"><span class="echo">Mehujael</span></td><td class="s"><span class="echo">Mahalalel</span></td></tr>
+          <tr><td>6</td><td class="c"><span class="echo">Methushael</span></td><td class="s"><span class="echo">Jared</span></td></tr>
+          <tr><td>7</td><td class="c"><span class="echo">Lamech</span><small>2 wives; boasts “77-fold” vengeance</small></td><td class="s"><span class="echo">Enoch</span><small>walked with God; taken</small></td></tr>
+          <tr><td>8</td><td class="c">Jabal · Jubal · Tubal-cain · Naamah<small>tents &amp; herds · music · metalwork</small></td><td class="s"><span class="echo">Methuselah</span></td></tr>
+          <tr><td>9</td><td class="c">—</td><td class="s"><span class="echo">Lamech</span><small>lives 777 years</small></td></tr>
+          <tr><td>10</td><td class="c">—</td><td class="s">Noah</td></tr>
+        </tbody>
+      </table>
+      <div class="key">
+        <span><i style="background:var(--cain)"></i>Cain’s line</span>
+        <span><i style="background:var(--seth)"></i>Seth’s line</span>
+        <span><i style="border-bottom:1px dotted var(--hi);height:6px"></i>names that echo across lines</span>
+      </div>
+
+      <div class="label">Lamech’s household (Cain line, 4:19–22)</div>
+      <pre class="tree"><span class="c">Lamech</span>
+ ├─ + <b>Adah</b>
+ │    ├─ Jabal       ─ father of tent-dwellers &amp; livestock
+ │    └─ Jubal       ─ father of lyre &amp; pipe
+ └─ + <b>Zillah</b>
+      ├─ Tubal-cain  ─ forger of bronze &amp; iron
+      └─ Naamah      ─ his sister</pre>
+    </div>
+  </details>
+
+  <!-- Genesis 5 -->
+  <details>
+    <summary>
+      <span class="ch">05</span>
+      <span class="ttl">Book of the generations of Adam<small>Genesis 5 · Adam → Noah, with ages</small></span>
+      <span class="count">10 gens</span>
+      <span class="chev">›</span>
+    </summary>
+    <div class="body">
+      <p class="reveal">The first formal genealogy (<i>toledot #2</i>, 5:1). Each entry follows a set pattern: lived X years, fathered Y, lived Z more, died. The one break is Enoch, who doesn’t die. The ages give a full timeline from Adam to the Flood.</p>
+
+      <div class="label">Lifespans · years after creation (AM)</div>
+      <div class="tl" id="tl">
+        <div class="axis"><span></span><div class="ticks" id="ticks"></div><span></span></div>
+        <div id="rows"></div>
+      </div>
+      <p class="note">Bar = lifetime. Notch = age at fathering the named son. <span style="color:var(--hi)">│</span> = Flood (AM 1656). <span style="color:var(--hi)">↑</span> = taken. Tap a name to see who was alive at the same time.</p>
+
+      <div class="label">The numbers</div>
+      <div class="ages-wrap">
+        <table class="ages">
+          <thead><tr><th>Name</th><th>Fathered at</th><th>Then lived</th><th>Total</th><th>Born</th><th>Died</th></tr></thead>
+          <tbody id="ages"></tbody>
+        </table>
+      </div>
+
+      <div class="facts" style="margin-top:14px">
+        <span class="ref">5:1</span><span><em>Toledot #2</em> — “the book of the generations of Adam.”</span>
+        <span class="ref">5:3</span><span>Seth is born “in his own likeness, after his image.”</span>
+        <span class="ref">5:24</span><span>Enoch “was not, for God took him.” The only entry with no death.</span>
+        <span class="ref">5:27</span><span>Methuselah, 969, dies in the year of the Flood.</span>
+        <span class="ref">5:29</span><span>Lamech names Noah: “he shall bring us relief.”</span>
+        <span class="ref">5:32</span><span>Noah, at 500, fathers Shem, Ham and Japheth.</span>
+      </div>
+    </div>
+  </details>
+
+  <footer>
+    * Dates in years after creation (AM), added up from the Masoretic Hebrew text of Genesis 5 and 7:6. The Greek Septuagint and Samaritan texts give different numbers.<br>
+    Noah’s lifespan (950) comes from Genesis 9:29.
+  </footer>
+</main>
+
+<script>
+  // [name, age at son, years after, total, note]
+  const LINE = [
+    ["Adam", 130, 800, 930],
+    ["Seth", 105, 807, 912],
+    ["Enosh", 90, 815, 905],
+    ["Kenan", 70, 840, 910],
+    ["Mahalalel", 65, 830, 895],
+    ["Jared", 162, 800, 962],
+    ["Enoch", 65, 300, 365, "taken"],
+    ["Methuselah", 187, 782, 969],
+    ["Lamech", 182, 595, 777],
+    ["Noah", 500, null, 950, "open"]
+  ];
+  const FLOOD = 1656, MAX = 1700;
+  const pct = y => (Math.min(y, MAX) / MAX * 100) + "%";
+  const fmt = n => n.toLocaleString("en-US");
+
+  let born = 0;
+  const people = LINE.map(([name, beget, after, total, flag], i) => {
+    const p = { name, beget, after, total, flag, gen: i + 1, born, died: born + total };
+    born += beget;
+    return p;
+  });
+
+  document.getElementById("ticks").innerHTML =
+    [0, 500, 1000, 1500].map(t => `<span style="left:${pct(t)}">${t}</span>`).join("");
+
+  const rows = document.getElementById("rows");
+  rows.innerHTML = people.map(p => {
+    const end = p.flag === "open" ? MAX : p.died;
+    return `<div class="row" data-i="${p.gen - 1}" role="button" tabindex="0">
+      <span class="nm"><small>${p.gen}</small>${p.name}</span>
+      <div class="track">
+        <div class="bar ${p.flag || ""}" style="left:${pct(p.born)};width:calc(${pct(end)} - ${pct(p.born)})"></div>
+        <div class="beget" style="left:${pct(p.born + p.beget)}"></div>
+        <div class="flood" style="left:${pct(FLOOD)}"></div>
+      </div>
+      <span class="tot">${p.total}</span>
+      <div class="detail"></div>
+    </div>`;
+  }).join("");
+
+  const tl = document.getElementById("tl");
+  const rowEls = [...rows.children];
+  function select(i) {
+    const was = rowEls[i].classList.contains("on");
+    rowEls.forEach(r => r.classList.remove("on", "ov"));
+    tl.classList.toggle("focus", !was);
+    if (was) return;
+    const p = people[i];
+    const ov = people.filter(q => q !== p && q.born < p.died && p.born < q.died);
+    rowEls[i].classList.add("on");
+    ov.forEach(q => rowEls[q.gen - 1].classList.add("ov"));
+    const life = p.flag === "open"
+      ? `born <span class="num">AM ${fmt(p.born)}</span>, <span class="num">${FLOOD - p.born}</span> at the Flood`
+      : `<span class="num">AM ${fmt(p.born)}–${fmt(p.died)}</span>${p.flag === "taken" ? " (taken)" : ""}`;
+    rowEls[i].querySelector(".detail").innerHTML =
+      `${life} · alive at the same time as <span class="num">${ov.length}</span>: ${ov.map(q => q.name).join(", ")}`;
+  }
+  rowEls.forEach((r, i) => {
+    r.addEventListener("click", () => select(i));
+    r.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); select(i); } });
+  });
+
+  document.getElementById("ages").innerHTML = people.map(p => `<tr>
+    <td>${p.name}</td><td>${p.beget}</td><td>${p.after ?? "—"}</td>
+    <td class="t">${p.total}</td><td>${fmt(p.born)}</td><td>${fmt(p.died)}</td>
+  </tr>`).join("");
+
+  const all = () => document.querySelectorAll("details");
+  document.getElementById("expand").onclick = () => all().forEach(d => d.open = true);
+  document.getElementById("collapse").onclick = () => all().forEach(d => d.open = false);
+</script>
+</body>
+</html>
