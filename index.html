@@ -82,7 +82,6 @@
   .node.root { border-color: #444; }
   .node.ghost { width: 132px; border-style: dashed; border-color: var(--hi); background: transparent; }
   .node.ghost b { color: var(--hi); font-weight: 500; }
-  .node.end b { color: var(--dim); }
   .node.new { border-color: var(--hi); box-shadow: 0 0 0 1px rgba(217, 180, 90, .25), 0 0 14px rgba(217, 180, 90, .12); }
   .node.upd .sub { color: var(--hi); }
 
@@ -109,36 +108,36 @@
     kids: [{
       id: "adam", ch: 1,
       pair: [
-        { sex: "m", name: { 1: "Male", 2: "The man", 3: "Adam" }, sub: { 1: "1:27", 2: "dust · 2:7", 5: "930 yrs" } },
-        { sex: "f", name: { 1: "Female", 2: "The woman", 3: "Eve" }, sub: { 1: "1:27", 2: "rib · 2:22", 3: "named · 3:20" } }
+        { sex: "m", name: { 1: "Male", 2: "The man", 3: "Adam" }, sub: { 1: "1:27", 2: "2:7", 5: "930 yrs" } },
+        { sex: "f", name: { 1: "Female", 2: "The woman", 3: "Eve" }, sub: { 1: "1:27", 2: "2:22", 3: "3:20" } }
       ],
       kids: [
         { id: "cain", ch: 4, sex: "m", name: "Cain", sub: "4:1",
-          kids: [{ id: "enochC", ch: 4, sex: "m", name: "Enoch", sub: "city · 4:17",
+          kids: [{ id: "enochC", ch: 4, sex: "m", name: "Enoch", sub: "4:17",
             kids: [{ id: "irad", ch: 4, sex: "m", name: "Irad", sub: "4:18",
               kids: [{ id: "mehujael", ch: 4, sex: "m", name: "Mehujael", sub: "4:18",
                 kids: [{ id: "methushael", ch: 4, sex: "m", name: "Methushael", sub: "4:18",
                   kids: [{ id: "lamechC", ch: 4, sex: "m", name: "Lamech", sub: "4:18",
                     kids: [
-                      { id: "adah", ch: 4, sex: "f", name: "Adah", sub: "wife · 4:19",
+                      { id: "adah", ch: 4, sex: "f", name: "Adah", sub: "4:19",
                         kids: [
-                          { id: "jabal", ch: 4, sex: "m", name: "Jabal", sub: "herds · 4:20" },
-                          { id: "jubal", ch: 4, sex: "m", name: "Jubal", sub: "music · 4:21" }
+                          { id: "jabal", ch: 4, sex: "m", name: "Jabal", sub: "4:20" },
+                          { id: "jubal", ch: 4, sex: "m", name: "Jubal", sub: "4:21" }
                         ] },
-                      { id: "zillah", ch: 4, sex: "f", name: "Zillah", sub: "wife · 4:19",
+                      { id: "zillah", ch: 4, sex: "f", name: "Zillah", sub: "4:19",
                         kids: [
-                          { id: "tubal", ch: 4, sex: "m", name: "Tubal-cain", sub: "metal · 4:22" },
+                          { id: "tubal", ch: 4, sex: "m", name: "Tubal-cain", sub: "4:22" },
                           { id: "naamah", ch: 4, sex: "f", name: "Naamah", sub: "4:22" }
                         ] }
                     ] }] }] }] }] }] },
-        { id: "abel", ch: 4, sex: "m", cls: "end", name: "Abel", sub: "killed · 4:8" },
+        { id: "abel", ch: 4, sex: "m", name: "Abel", sub: "4:8" },
         { id: "seed", ch: 3, only: 3, slot: "abel", cls: "ghost", name: "Seed of the woman", sub: "3:15" },
         { id: "seth", ch: 4, sex: "m", name: "Seth", sub: { 4: "4:25", 5: "912 yrs" },
           kids: [{ id: "enosh", ch: 4, sex: "m", name: "Enosh", sub: { 4: "4:26", 5: "905 yrs" },
             kids: [{ id: "kenan", ch: 5, sex: "m", name: "Kenan", sub: "910 yrs",
               kids: [{ id: "mahalalel", ch: 5, sex: "m", name: "Mahalalel", sub: "895 yrs",
                 kids: [{ id: "jared", ch: 5, sex: "m", name: "Jared", sub: "962 yrs",
-                  kids: [{ id: "enochS", ch: 5, sex: "m", name: "Enoch", sub: "taken ↑ 365",
+                  kids: [{ id: "enochS", ch: 5, sex: "m", name: "Enoch", sub: "365 yrs",
                     kids: [{ id: "methuselah", ch: 5, sex: "m", name: "Methuselah", sub: "969 yrs",
                       kids: [{ id: "lamechS", ch: 5, sex: "m", name: "Lamech", sub: "777 yrs",
                         kids: [{ id: "noah", ch: 5, sex: "m", name: "Noah", sub: "5:29",
