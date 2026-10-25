@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#000000">
-<meta name="description" content="An org-chart view of the genealogy in Genesis 1–5, built up chapter by chapter.">
-<title>Genesis 1–5 Genealogy</title>
+<meta name="description" content="An org-chart view of the genealogy in Genesis 1–10, built up chapter by chapter.">
+<title>Genesis 1–10 Genealogy</title>
 <style>
   :root {
     --bg: #000;
@@ -43,14 +43,11 @@
     font: 12px var(--mono); letter-spacing: .04em;
   }
   aside button b { display: block; font: 600 18px/1.1 var(--mono); white-space: nowrap; }
-  aside button span { display: block; font-size: 10px; margin-top: 3px; }
   aside button:hover { color: var(--text); }
   aside button[aria-selected="true"] { color: var(--text); border-left-color: var(--hi); background: #080808; }
-  aside button[aria-selected="true"] span { color: var(--dim); }
   @media (max-width: 600px) {
     aside button { padding: 12px 10px 12px 8px; font-size: 10px; }
     aside button b { font-size: 15px; }
-    aside button span { display: none; }
   }
 
   /* Org chart: every box has a fixed slot; chapters only fade boxes in and out */
@@ -64,26 +61,23 @@
   .unit { position: absolute; left: 0; top: 0; display: flex; align-items: center; justify-content: center; }
   .anim .unit { transition: transform .4s var(--ease), opacity .3s; }
   .off { opacity: 0; pointer-events: none; }
-  .bond { flex: 0 0 12px; height: 1px; background: var(--wire); }
+  .bond { flex: 0 0 10px; height: 1px; background: var(--wire); }
 
   .node {
-    position: relative; width: 92px; height: 44px; padding: 0 5px;
-    display: flex; flex-direction: column; justify-content: center;
-    background: var(--panel); border: 1px solid var(--box); border-radius: 6px; text-align: center;
+    position: relative; width: 96px; height: 30px; padding: 0 6px;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--panel); border: 1px solid var(--box); border-radius: 6px;
+    font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     transition: border-color .3s, box-shadow .3s;
   }
-  .node b { display: block; font-size: 12.5px; font-weight: 600; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .node .sub { display: block; font: 10px/1.3 var(--mono); color: var(--dim); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: color .3s; }
   .node i { font-style: normal; font-size: 11px; margin-right: 4px; font-weight: 400; }
   .node.m { border-radius: 2px; border-color: #2b3a47; }
   .node.m i { color: var(--male); }
   .node.f { border-radius: 14px; border-color: #4a2f3a; }
   .node.f i { color: var(--female); }
   .node.root { border-color: #444; }
-  .node.ghost { width: 132px; border-style: dashed; border-color: var(--hi); background: transparent; }
-  .node.ghost b { color: var(--hi); font-weight: 500; }
+  .node.ghost { width: 132px; border-style: dashed; border-color: var(--hi); background: transparent; color: var(--hi); font-weight: 500; }
   .node.new { border-color: var(--hi); box-shadow: 0 0 0 1px rgba(217, 180, 90, .25), 0 0 14px rgba(217, 180, 90, .12); }
-  .node.upd .sub { color: var(--hi); }
 
   .fold {
     position: absolute; left: 50%; bottom: -9px; transform: translateX(-50%); z-index: 2;
@@ -99,64 +93,68 @@
   <main id="chart"><div class="stage" id="stage"></div></main>
 
 <script>
-  // Values keyed by chapter take the latest key ≤ the view's last chapter.
-  // ch = chapter the node first appears in; only = shown only in the view covering that chapter;
-  // slot = sits in another node's position instead of taking its own.
-  // sex: m / f; pair = two people joined as a couple, children hang from the middle.
+  // ch = chapter a name first appears in. Names keyed by chapter take the latest key ≤ the view's last chapter.
+  // only = shown only in the view covering that chapter; under = sits right below its parent, outside the layout.
+  // sex: m / f, or none for peoples (e.g. Jebusites). pair = a couple; children hang from the middle.
+  const M = (name, ch, kids) => ({ name, ch, sex: "m", kids });
+  const F = (name, ch, kids) => ({ name, ch, sex: "f", kids });
+  const X = (name, ch) => ({ name, ch });
+  const list = (ch, names, make = M) => names.map(n => make(n, ch));
+
   const TREE = {
-    id: "god", name: "God", sub: "1:1", ch: 1, cls: "root",
+    name: "God", ch: 1, cls: "root",
     kids: [{
-      id: "adam", ch: 1,
+      ch: 1,
       pair: [
-        { sex: "m", name: { 1: "Male", 2: "The man", 3: "Adam" }, sub: { 1: "1:27", 2: "2:7", 5: "930 yrs" } },
-        { sex: "f", name: { 1: "Female", 2: "The woman", 3: "Eve" }, sub: { 1: "1:27", 2: "2:22", 3: "3:20" } }
+        { sex: "m", name: { 1: "Male", 2: "The man", 3: "Adam" } },
+        { sex: "f", name: { 1: "Female", 2: "The woman", 3: "Eve" } }
       ],
       kids: [
-        { id: "cain", ch: 4, sex: "m", name: "Cain", sub: "4:1",
-          kids: [{ id: "enochC", ch: 4, sex: "m", name: "Enoch", sub: "4:17",
-            kids: [{ id: "irad", ch: 4, sex: "m", name: "Irad", sub: "4:18",
-              kids: [{ id: "mehujael", ch: 4, sex: "m", name: "Mehujael", sub: "4:18",
-                kids: [{ id: "methushael", ch: 4, sex: "m", name: "Methushael", sub: "4:18",
-                  kids: [{ id: "lamechC", ch: 4, sex: "m", name: "Lamech", sub: "4:18",
-                    kids: [
-                      { id: "adah", ch: 4, sex: "f", name: "Adah", sub: "4:19",
-                        kids: [
-                          { id: "jabal", ch: 4, sex: "m", name: "Jabal", sub: "4:20" },
-                          { id: "jubal", ch: 4, sex: "m", name: "Jubal", sub: "4:21" }
-                        ] },
-                      { id: "zillah", ch: 4, sex: "f", name: "Zillah", sub: "4:19",
-                        kids: [
-                          { id: "tubal", ch: 4, sex: "m", name: "Tubal-cain", sub: "4:22" },
-                          { id: "naamah", ch: 4, sex: "f", name: "Naamah", sub: "4:22" }
-                        ] }
-                    ] }] }] }] }] }] },
-        { id: "abel", ch: 4, sex: "m", name: "Abel", sub: "4:8" },
-        { id: "seed", ch: 3, only: 3, slot: "abel", cls: "ghost", name: "Seed of the woman", sub: "3:15" },
-        { id: "seth", ch: 4, sex: "m", name: "Seth", sub: { 4: "4:25", 5: "912 yrs" },
-          kids: [{ id: "enosh", ch: 4, sex: "m", name: "Enosh", sub: { 4: "4:26", 5: "905 yrs" },
-            kids: [{ id: "kenan", ch: 5, sex: "m", name: "Kenan", sub: "910 yrs",
-              kids: [{ id: "mahalalel", ch: 5, sex: "m", name: "Mahalalel", sub: "895 yrs",
-                kids: [{ id: "jared", ch: 5, sex: "m", name: "Jared", sub: "962 yrs",
-                  kids: [{ id: "enochS", ch: 5, sex: "m", name: "Enoch", sub: "365 yrs",
-                    kids: [{ id: "methuselah", ch: 5, sex: "m", name: "Methuselah", sub: "969 yrs",
-                      kids: [{ id: "lamechS", ch: 5, sex: "m", name: "Lamech", sub: "777 yrs",
-                        kids: [{ id: "noah", ch: 5, sex: "m", name: "Noah", sub: "5:29",
-                          kids: [
-                            { id: "shem", ch: 5, sex: "m", name: "Shem", sub: "5:32" },
-                            { id: "ham", ch: 5, sex: "m", name: "Ham", sub: "5:32" },
-                            { id: "japheth", ch: 5, sex: "m", name: "Japheth", sub: "5:32" }
-                          ] }] }] }] }] }] }] }] }] }
+        M("Cain", 4, [M("Enoch", 4, [M("Irad", 4, [M("Mehujael", 4, [M("Methushael", 4, [M("Lamech", 4, [
+          F("Adah", 4, [M("Jabal", 4), M("Jubal", 4)]),
+          F("Zillah", 4, [M("Tubal-cain", 4), F("Naamah", 4)])
+        ])])])])])]),
+        M("Abel", 4),
+        { name: "Seed of the woman", ch: 3, only: 3, under: true, cls: "ghost" },
+        M("Seth", 4, [M("Enosh", 4, [M("Kenan", 5, [M("Mahalalel", 5, [M("Jared", 5, [M("Enoch", 5, [M("Methuselah", 5, [M("Lamech", 5, [
+          M("Noah", 5, [
+            M("Shem", 5, [
+              M("Elam", 10), M("Asshur", 10),
+              M("Arpachshad", 10, [M("Shelah", 10, [M("Eber", 10, [
+                M("Peleg", 10),
+                M("Joktan", 10, list(10, ["Almodad", "Sheleph", "Hazarmaveth", "Jerah", "Hadoram", "Uzal", "Diklah", "Obal", "Abimael", "Sheba", "Ophir", "Havilah", "Jobab"]))
+              ])])]),
+              M("Lud", 10),
+              M("Aram", 10, list(10, ["Uz", "Hul", "Gether", "Mash"]))
+            ]),
+            M("Ham", 5, [
+              M("Cush", 10, [M("Seba", 10), M("Havilah", 10), M("Sabtah", 10), M("Raamah", 10, list(10, ["Sheba", "Dedan"])), M("Sabteca", 10), M("Nimrod", 10)]),
+              M("Mizraim", 10, list(10, ["Ludim", "Anamim", "Lehabim", "Naphtuhim", "Pathrusim", "Casluhim", "Caphtorim"], X)),
+              M("Put", 10),
+              M("Canaan", 9, [M("Sidon", 10), M("Heth", 10),
+                ...list(10, ["Jebusites", "Amorites", "Girgashites", "Hivites", "Arkites", "Sinites", "Arvadites", "Zemarites", "Hamathites"], X)])
+            ]),
+            M("Japheth", 5, [
+              M("Gomer", 10, list(10, ["Ashkenaz", "Riphath", "Togarmah"])),
+              M("Magog", 10), M("Madai", 10),
+              M("Javan", 10, [M("Elishah", 10), M("Tarshish", 10), X("Kittim", 10), X("Dodanim", 10)]),
+              M("Tubal", 10), M("Meshech", 10), M("Tiras", 10)
+            ])
+          ])
+        ])])])])])])])])
       ]
     }]
   };
 
-  // Genesis 1–3 add no new descendants, so they share one view.
+  // Chapters that add nothing new to the tree share a view with their neighbors.
   const VIEWS = [
-    { from: 1, to: 3, label: "1–3", sub: "Creation · Fall" },
-    { from: 4, to: 4, label: "4", sub: "Two lines" },
-    { from: 5, to: 5, label: "5", sub: "To Noah" }
+    { from: 1, to: 3, label: "1–3" },
+    { from: 4, to: 4, label: "4" },
+    { from: 5, to: 5, label: "5" },
+    { from: 6, to: 9, label: "6–9" },
+    { from: 10, to: 10, label: "10" }
   ];
-  const W = 92, H = 44, BOND = 12, GAP = 8, ROW = 72, PAD = 20;
+  const W = 96, H = 30, BOND = 10, GAP = 10, ROW = 60, PAD = 20, INDENT = 14, SGAP = 6;
   const SYM = { m: "♂︎", f: "♀︎" };
 
   const at = (v, ch) => {
@@ -164,43 +162,61 @@
     let r; for (const k in v) if (+k <= ch) r = v[k];
     return r;
   };
-  const changedIn = (v, view) => v != null && typeof v === "object" && Object.keys(v).some(k => k >= view.from && k <= view.to);
 
-  const nodes = [], byId = {};
-  (function walk(n, parent, depth) {
-    Object.assign(n, { parent, depth, kids: n.kids || [] });
-    nodes.push(n); byId[n.id] = n;
-    n.kids.forEach(k => walk(k, n, depth + 1));
-  })(TREE, null, 0);
+  const nodes = [];
+  (function walk(n, parent) {
+    n.id = n.id || "n" + nodes.length;
+    Object.assign(n, { parent, kids: n.kids || [] });
+    nodes.push(n);
+    n.kids.forEach(k => walk(k, n));
+  })(TREE, null);
 
-  let view = VIEWS[2];
+  let view = VIEWS[VIEWS.length - 1];
   const folded = new Set();
   const inView = n => n.ch <= view.to && (!n.only || (n.only >= view.from && n.only <= view.to));
   const foldedAbove = n => { for (let p = n.parent; p; p = p.parent) if (folded.has(p.id)) return p; return null; };
   const shown = n => inView(n) && !foldedAbove(n);
 
   // Layout uses the full tree (not the current chapter), so switching chapters never moves anything.
-  const layoutKids = n => folded.has(n.id) ? [] : n.kids.filter(k => !k.slot);
-  const unitW = n => n.pair ? 2 * W + BOND : W;
+  // Childless siblings (2+) stack into one vertical list to keep the chart narrow.
+  const layoutKids = n => folded.has(n.id) ? [] : n.kids.filter(k => !k.under);
+  const unitW = n => n.pair ? 2 * W + BOND : n.cls === "ghost" ? 132 : W;
+  const colW = c => c.node ? c.node.sw : INDENT + W;
   function measure(n) {
-    const ks = layoutKids(n);
-    ks.forEach(measure);
-    n.kw = ks.reduce((s, k) => s + k.sw, 0) + GAP * Math.max(0, ks.length - 1);
+    const ks = layoutKids(n), leaves = ks.filter(k => !layoutKids(k).length);
+    n.cols = [];
+    let stack = null;
+    ks.forEach(k => {
+      if (leaves.length >= 2 && leaves.includes(k)) {
+        if (!stack) n.cols.push(stack = { items: [] });
+        stack.items.push(k);
+      } else {
+        n.cols.push({ node: k });
+        measure(k);
+      }
+    });
+    n.kw = n.cols.reduce((s, c) => s + colW(c), 0) + GAP * Math.max(0, n.cols.length - 1);
     n.sw = Math.max(unitW(n), n.kw);
   }
-  function place(n, left) {
-    n.cx = left + n.sw / 2;
-    n.y = PAD + n.depth * ROW;
+  function place(n, left, y) {
+    Object.assign(n, { cx: left + n.sw / 2, y, stacked: false, spineX: null });
     let x = left + (n.sw - n.kw) / 2;
-    layoutKids(n).forEach(k => { place(k, x); x += k.sw + GAP; });
+    n.cols.forEach(c => {
+      if (c.node) place(c.node, x, y + ROW);
+      else {
+        n.spineX = x + INDENT / 2;
+        c.items.forEach((k, i) => Object.assign(k, { cx: x + INDENT + W / 2, y: y + ROW + i * (H + SGAP), stacked: true }));
+      }
+      x += colW(c) + GAP;
+    });
   }
 
   // Build every element once.
   const stage = document.getElementById("stage"), chart = document.getElementById("chart");
   const wire = () => { const d = document.createElement("div"); d.className = "wire off"; stage.appendChild(d); return d; };
-  const boxHTML = p => `<div class="node ${p.sex || ""} ${p.cls || ""}"><b>${p.sex ? `<i>${SYM[p.sex]}</i>` : ""}<span class="nm"></span></b><span class="sub"></span></div>`;
+  const boxHTML = p => `<div class="node ${p.sex || ""} ${p.cls || ""}">${p.sex ? `<i>${SYM[p.sex]}</i>` : ""}<span class="nm"></span></div>`;
   nodes.forEach(n => {
-    if (n.kids.length) { n.stem = wire(); n.bar = wire(); }
+    if (n.kids.length) { n.stem = wire(); n.bar = wire(); n.spine = wire(); }
     if (n.parent) n.drop = wire();
   });
   nodes.forEach(n => {
@@ -214,18 +230,19 @@
   });
 
   function setWire(el, x, y, w, h, on) {
-    Object.assign(el.style, { left: x + "px", top: y + "px", width: w + "px", height: h + "px" });
+    Object.assign(el.style, { left: x + "px", top: y + "px", width: Math.max(w, 0) + "px", height: Math.max(h, 0) + "px" });
     el.classList.toggle("off", !on);
   }
+  const count = k => inView(k) ? 1 + k.kids.reduce((s, c) => s + count(c), 0) : 0;
 
   function update() {
     measure(TREE);
-    place(TREE, PAD);
-    // Folded-away nodes collapse into the folded ancestor; slotted nodes borrow their slot.
+    place(TREE, PAD, PAD);
+    // Folded-away nodes collapse into the folded ancestor.
     nodes.forEach(n => {
       const f = foldedAbove(n);
-      if (n.slot) { const s = byId[n.slot]; n.cx = s.cx; n.y = s.y; }
-      else if (f) { n.cx = f.cx; n.y = f.y; }
+      if (n.under) Object.assign(n, { cx: n.parent.cx, y: n.parent.y + ROW, stacked: false });
+      else if (f) Object.assign(n, { cx: f.cx, y: f.y, stacked: false });
     });
 
     let bottom = 0;
@@ -238,26 +255,27 @@
 
       const isNew = n.ch >= view.from && n.ch <= view.to;
       (n.pair || [n]).forEach((p, i) => {
-        const bx = n.boxes[i];
-        bx.querySelector(".nm").textContent = at(p.name, view.to);
-        bx.querySelector(".sub").textContent = at(p.sub, view.to);
-        bx.classList.toggle("new", isNew);
-        bx.classList.toggle("upd", !isNew && changedIn(p.sub, view));
+        n.boxes[i].querySelector(".nm").textContent = at(p.name, view.to);
+        n.boxes[i].classList.toggle("new", isNew);
       });
 
       if (!n.kids.length) return;
-      const vis = n.kids.filter(shown);
+      const vis = n.kids.filter(shown), st = vis.filter(k => k.stacked);
       const top = n.y + (n.pair ? H / 2 : H), mid = n.y + H + (ROW - H) / 2;
+      const spineX = n.spineX ?? n.cx;
       setWire(n.stem, n.cx, top, 1, mid - top, vis.length > 0);
-      const xs = vis.length > 1 ? vis.map(k => k.cx) : [n.cx];
-      setWire(n.bar, Math.min(...xs), mid, Math.max(...xs) - Math.min(...xs) + 1, 1, vis.length > 1);
-      n.kids.forEach(k => setWire(k.drop, k.cx, mid, 1, k.y - mid, shown(k)));
+      const xs = vis.filter(k => !k.stacked).map(k => k.cx).concat(st.length ? [spineX] : []);
+      const x0 = xs.length > 1 ? Math.min(...xs) : n.cx, x1 = xs.length > 1 ? Math.max(...xs) : n.cx;
+      setWire(n.bar, x0, mid, x1 - x0 + 1, 1, xs.length > 1);
+      const last = st.length ? st[st.length - 1].y + H / 2 : mid;
+      setWire(n.spine, spineX, mid, 1, last - mid + 1, st.length > 0);
+      n.kids.forEach(k => k.stacked
+        ? setWire(k.drop, spineX, k.y + H / 2, k.cx - W / 2 - spineX, 1, shown(k))
+        : setWire(k.drop, k.cx, mid, 1, k.y - mid, shown(k)));
 
-      const hidden = n.kids.filter(inView);
       const isFolded = folded.has(n.id);
-      const count = k => inView(k) ? 1 + k.kids.reduce((s, c) => s + count(c), 0) : 0;
-      n.btn.classList.toggle("off", !hidden.length);
-      n.btn.textContent = isFolded ? "+" + hidden.reduce((s, k) => s + count(k), 0) : "−";
+      n.btn.classList.toggle("off", !n.kids.some(inView));
+      n.btn.textContent = isFolded ? "+" + n.kids.reduce((s, k) => s + count(k), 0) : "−";
       n.btn.setAttribute("aria-label", isFolded ? "Expand branch" : "Collapse branch");
     });
 
@@ -266,8 +284,7 @@
   }
 
   const tabs = document.getElementById("tabs");
-  tabs.innerHTML = VIEWS.map((v, i) =>
-    `<button type="button" role="tab" data-i="${i}">Gen<b>${v.label}</b><span>${v.sub}</span></button>`).join("");
+  tabs.innerHTML = VIEWS.map((v, i) => `<button type="button" role="tab" data-i="${i}">Gen<b>${v.label}</b></button>`).join("");
 
   function setView(i) {
     view = VIEWS[i];
@@ -288,8 +305,9 @@
     update();
   });
 
-  const m = location.hash.match(/^#gen([1-5])$/);
-  setView(m ? VIEWS.findIndex(v => +m[1] <= v.to) : 2);
+  const m = location.hash.match(/^#gen(\d+)$/);
+  const start = m ? VIEWS.findIndex(v => +m[1] <= v.to) : -1;
+  setView(start >= 0 ? start : VIEWS.length - 1);
   chart.scrollLeft = stage.offsetLeft + TREE.cx - chart.clientWidth / 2;
   requestAnimationFrame(() => requestAnimationFrame(() => document.body.classList.add("anim")));
 </script>
